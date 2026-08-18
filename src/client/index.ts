@@ -9,7 +9,7 @@
  * services, so the viewer registration is never skipped by activation order.
  */
 import type {} from 'dock/client/contract'
-import type { WorkbenchContext, WorkbenchService } from 'dock/client/contract'
+import type { CloseRequest, WorkbenchContext, WorkbenchService } from 'dock/client/contract'
 import { EditorView } from './EditorView'
 
 /** Requires the workbench base (carrier) and the dock-files file domain. */
@@ -31,11 +31,23 @@ export function apply(ctx: WorkbenchContext): void {
   // Register as the file domain's default viewer (id matches the editor view).
   ctx.effect(() => files.registerFileViewer({ id: 'editor', default: true }), 'dock-editor: file viewer')
 
-  // The editor-area view that receives open seeds ({ path, title }).
+  // The view that receives open seeds ({ path, title }). It stays registered
+  // as an editor-area view because floating windows resolve their view
+  // through this registry; opening itself is always floating (dock-files
+  // dispatches { mode: 'floating' }), so no tab-open path remains. The
+  // beforeClose hook consumes the dirty flag the view syncs onto seed.meta
+  // (updateViewSeed) and confirms closing the window with unsaved edits.
   ctx.effect(() => workbench.registerEditorView({
     id: 'editor',
     title: 'Editor',
     order: 100,
     component: EditorView,
+    beforeClose: (request: CloseRequest) => {
+      const meta = request.seed?.meta
+      if (meta !== null && typeof meta === 'object' && (meta as { dirty?: unknown }).dirty === true) {
+        return window.confirm('有未保存的修改，确定关闭？')
+      }
+      return true
+    },
   }), 'dock-editor: editor view')
 }
