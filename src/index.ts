@@ -4,7 +4,7 @@
  * gateway; conversation-scoped through the session cwd. Wire / fence /
  * fs helpers follow the same stripped pattern as desk-files.
  */
-import { open, stat } from 'node:fs/promises'
+import { open, stat, writeFile } from 'node:fs/promises'
 import type { IncomingHttpHeaders, IncomingMessage, ServerResponse } from 'node:http'
 
 export const name = 'desk-editor'
@@ -224,6 +224,20 @@ export function apply(ctx: WbContext): void {
           const cwd = sessionCwdOf(ctx, sessionId)
           const file = await readFileText(requireAbsolute(raw), READ_LIMIT_BYTES)
           writeOk(res, { file, cwd })
+          return
+        }
+        if (method === 'fs.write') {
+          const raw = stringOrUndefined(payload, 'path')
+          const text = stringOrUndefined(payload, 'content')
+          if (raw === undefined || text === undefined) {
+            writeError(res, new WbError('bad-request', 'fs.write requires "path" and "content"', 400))
+            return
+          }
+          const cwd = sessionCwdOf(ctx, stringOrUndefined(payload, 'sessionId'))
+          await writeFile(requireAbsolute(raw), text, 'utf8').catch((error) => {
+            throw new WbError('fs-error', `cannot write "${raw}": ${messageOf(error)}`, 400)
+          })
+          writeOk(res, { saved: true, cwd })
           return
         }
         writeError(res, new WbError('not-found', `unknown /desk-editor method "${method}"`, 404))
