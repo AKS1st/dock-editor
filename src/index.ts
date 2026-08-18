@@ -1,5 +1,5 @@
 /**
- * Host half of dock-editor: the /dock-editor JSON API (text file read with a
+ * Host half of dock-editor: the /desk-editor JSON API (text file read with a
  * size cap, binary NUL detection). Browser-trust fenced like the /api
  * gateway; conversation-scoped through the session cwd. Wire / fence /
  * fs helpers follow the same stripped pattern as dock-files.
@@ -196,7 +196,7 @@ function sessionCwdOf(ctx: WbContext, sessionId: string | undefined): string {
 export function apply(ctx: WbContext): void {
   ctx.effect(() => ctx.webServer.register({
     kind: 'prefix',
-    path: '/dock-editor',
+    path: '/desk-editor',
     handler: async (req, res) => {
       if (!isTrustedRequest(req, ctx.webRuntime.trustedHosts)) {
         writeJson(res, 403, { ok: false, error: { code: 'forbidden', message: 'forbidden' } })
@@ -207,9 +207,9 @@ export function apply(ctx: WbContext): void {
         return
       }
       const pathname = new URL(req.url ?? '/', 'http://dsh.internal').pathname
-      const method = pathname.startsWith('/dock-editor/') ? pathname.slice('/dock-editor/'.length) : undefined
+      const method = pathname.startsWith('/desk-editor/') ? pathname.slice('/desk-editor/'.length) : undefined
       if (method === undefined || method.includes('/')) {
-        writeError(res, new WbError('not-found', `unknown /dock-editor method "${method}"`, 404))
+        writeError(res, new WbError('not-found', `unknown /desk-editor method "${method}"`, 404))
         return
       }
       try {
@@ -240,10 +240,10 @@ export function apply(ctx: WbContext): void {
           writeOk(res, { saved: true, cwd })
           return
         }
-        writeError(res, new WbError('not-found', `unknown /dock-editor method "${method}"`, 404))
+        writeError(res, new WbError('not-found', `unknown /desk-editor method "${method}"`, 404))
       } catch (error) {
         writeError(res, error)
       }
     },
-  }), 'dock-editor: /dock-editor routes')
+  }), 'dock-editor: /desk-editor routes')
 }

@@ -2,7 +2,7 @@
  * Client half of dock-editor: registers the 'editor' file viewer against the
  * dock-files file domain (as the default viewer) and the matching editor-area
  * view against dock. The view renders a file's text content (read-only in
- * Phase 1) fetched through its own /dock-editor/fs.read host route.
+ * Phase 1) fetched through its own /desk-editor/fs.read host route.
  *
  * inject declares BOTH 'workbench' and 'files': Cordis activates this plugin
  * only after dock (carrier) and dock-files (file domain) have provided their

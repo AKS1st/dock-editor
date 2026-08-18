@@ -1,7 +1,7 @@
 /**
  * Editor view: editable text editor for the file carried by the open seed.
  * - textarea editing with a manual undo/redo stack (Ctrl+Z / Ctrl+Y)
- * - Ctrl+S (and the toolbar button) saves through /dock-editor/fs.write
+ * - Ctrl+S (and the toolbar button) saves through /desk-editor/fs.write
  * - toolbar (undo / redo / save) sits at the left of the title bar
  */
 import { createElement, useCallback, useEffect, useRef, useState, type ReactNode } from 'react'
@@ -72,7 +72,7 @@ export function EditorView(props: ViewProps): ReactNode {
     syncStacks()
     void (async () => {
       try {
-        const response = await fetch('/dock-editor/fs.read', {
+        const response = await fetch('/desk-editor/fs.read', {
           method: 'POST',
           headers: { 'content-type': 'application/json' },
           body: JSON.stringify({ sessionId, path }),
@@ -137,7 +137,7 @@ export function EditorView(props: ViewProps): ReactNode {
     if (path === undefined || contentRef.current === null) return
     setSaving(true)
     try {
-      const response = await fetch('/dock-editor/fs.write', {
+      const response = await fetch('/desk-editor/fs.write', {
         method: 'POST',
         headers: { 'content-type': 'application/json' },
         body: JSON.stringify({ sessionId, path, content: contentRef.current }),

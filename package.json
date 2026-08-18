@@ -1,7 +1,7 @@
 {
   "name": "dock-editor",
   "version": "0.1.0",
-  "description": "File viewer plugin for the dock-files file domain: registers the 'editor' file viewer (default) and the matching editor-area view. Renders a file's text content (read-only in Phase 1) through its own /dock-editor/fs.read host route.",
+  "description": "File viewer plugin for the dock-files file domain: registers the 'editor' file viewer (default) and the matching editor-area view. Renders a file's text content (read-only in Phase 1) through its own /desk-editor/fs.read host route.",
   "type": "module",
   "license": "MIT",
   "main": "./lib/index.js",
