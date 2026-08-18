@@ -1,6 +1,6 @@
-# desk-editor bundle patch: mounts the file-viewer feature plugin row
-# (client half registers the 'editor' file viewer against desk-files and
-# the matching editor-area view against desk).
+# dock-editor bundle patch: mounts the file-viewer feature plugin row
+# (client half registers the 'editor' file viewer against dock-files and
+# the matching editor-area view against dock).
 - insert:
-    - id: desk-editor
-      name: 'desk-editor'
+    - id: dock-editor
+      name: 'dock-editor'

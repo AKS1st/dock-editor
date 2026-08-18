@@ -1,10 +1,10 @@
 /**
- * tsdown build for desk-editor (same minimal pattern as desk / desk-files):
+ * tsdown build for dock-editor (same minimal pattern as dock / dock-files):
  * host half ESM; client half a single CJS closure factory. react / cordis
- * stay external; desk is imported type-only (erased), all runtime
+ * stay external; dock is imported type-only (erased), all runtime
  * interaction goes through ctx.workbench / ctx.files method calls.
  */
-const id = 'desk-editor'
+const id = 'dock-editor'
 
 const CLIENT_EXTERNALS = [
   'react',

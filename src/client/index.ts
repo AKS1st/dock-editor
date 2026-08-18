@@ -1,21 +1,21 @@
 /**
- * Client half of desk-editor: registers the 'editor' file viewer against the
- * desk-files file domain (as the default viewer) and the matching editor-area
- * view against desk. The view renders a file's text content (read-only in
- * Phase 1) fetched through its own /desk-editor/fs.read host route.
+ * Client half of dock-editor: registers the 'editor' file viewer against the
+ * dock-files file domain (as the default viewer) and the matching editor-area
+ * view against dock. The view renders a file's text content (read-only in
+ * Phase 1) fetched through its own /dock-editor/fs.read host route.
  *
  * inject declares BOTH 'workbench' and 'files': Cordis activates this plugin
- * only after desk (carrier) and desk-files (file domain) have provided their
+ * only after dock (carrier) and dock-files (file domain) have provided their
  * services, so the viewer registration is never skipped by activation order.
  */
-import type {} from 'desk/client/contract'
-import type { WorkbenchContext, WorkbenchService } from 'desk/client/contract'
+import type {} from 'dock/client/contract'
+import type { WorkbenchContext, WorkbenchService } from 'dock/client/contract'
 import { EditorView } from './EditorView'
 
-/** Requires the workbench base (carrier) and the desk-files file domain. */
+/** Requires the workbench base (carrier) and the dock-files file domain. */
 export const inject = ['workbench', 'files']
 
-/** Local structural face of ctx.files (avoid type dependency on desk-files). */
+/** Local structural face of ctx.files (avoid type dependency on dock-files). */
 interface FilesService {
   registerFileViewer(def: { id: string; exts?: string[]; default?: boolean }): () => void
 }
@@ -29,7 +29,7 @@ export function apply(ctx: WorkbenchContext): void {
   if (workbench === undefined || files === undefined) return
 
   // Register as the file domain's default viewer (id matches the editor view).
-  ctx.effect(() => files.registerFileViewer({ id: 'editor', default: true }), 'desk-editor: file viewer')
+  ctx.effect(() => files.registerFileViewer({ id: 'editor', default: true }), 'dock-editor: file viewer')
 
   // The editor-area view that receives open seeds ({ path, title }).
   ctx.effect(() => workbench.registerEditorView({
@@ -37,5 +37,5 @@ export function apply(ctx: WorkbenchContext): void {
     title: 'Editor',
     order: 100,
     component: EditorView,
-  }), 'desk-editor: editor view')
+  }), 'dock-editor: editor view')
 }

@@ -24,12 +24,12 @@ importers:
       '@types/react-dom':
         specifier: ^18.2.0
         version: 18.2.0
-      desk:
-        specifier: link:/home/zero/AgentX/plugins/desk
-        version: link:../desk
-      desk-files:
-        specifier: link:/home/zero/AgentX/plugins/desk-files
-        version: link:../desk-files
+      dock:
+        specifier: link:/home/zero/AgentX/plugins/dock
+        version: link:../dock
+      dock-files:
+        specifier: link:/home/zero/AgentX/plugins/dock-files
+        version: link:../dock-files
       tsdown:
         specifier: ^0.22.14
         version: 0.22.14(typescript@6.0.3)
