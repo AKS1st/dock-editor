@@ -17,7 +17,12 @@ export const inject = ['workbench', 'files']
 
 /** Local structural face of ctx.files (avoid type dependency on dock-files). */
 interface FilesService {
-  registerFileViewer(def: { id: string; exts?: string[]; default?: boolean }): () => void
+  registerFileViewer(def: {
+    id: string
+    exts?: string[]
+    default?: boolean
+    icon?: { color?: string; path?: string; viewBox?: string }
+  }): () => void
 }
 
 /** Client plugin body. */
@@ -28,8 +33,15 @@ export function apply(ctx: WorkbenchContext): void {
   // anyway so a broken runtime degrades instead of throwing.
   if (workbench === undefined || files === undefined) return
 
-  // Register as the file domain's default viewer (id matches the editor view).
-  ctx.effect(() => files.registerFileViewer({ id: 'editor', default: true }), 'dock-editor: file viewer')
+  // Register as the file domain's default viewer (id matches the editor view),
+  // carrying the explorer's fallback icon for types with no registered icon
+  // and no built-in palette entry (neutral gray, same as the explorer's
+  // unclassified-file default).
+  ctx.effect(() => files.registerFileViewer({
+    id: 'editor',
+    default: true,
+    icon: { color: '#8b949e' },
+  }), 'dock-editor: file viewer')
 
   // The view that receives open seeds ({ path, title }). It stays registered
   // as an editor-area view because floating windows resolve their view
