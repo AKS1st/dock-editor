@@ -4,6 +4,10 @@
 
 Text viewer/editor plugin of the dock family: registers the `editor` file viewer (the default one) and the matching editor-area view; reads and writes file text through its own `/desk-editor` host route.
 
+## Preview
+
+![dock-editor editor view](assets/image-en.png)
+
 ## Features
 
 - **Text viewing and editing**: textarea editing with a manual undo/redo stack (Ctrl+Z / Ctrl+Y) and Ctrl+S save.

@@ -4,6 +4,10 @@
 
 dock 系列的文件编辑器插件：注册 `editor` 文件查看器（默认查看器）与对应的编辑器区视图，通过自己的 `/desk-editor` 主机路由读写文件文本内容。
 
+## 效果预览
+
+![dock-editor 编辑器视图](assets/image-zh.png)
+
 ## 功能
 
 - **文本查看与编辑**：textarea 编辑，手动撤销/重做栈（Ctrl+Z / Ctrl+Y），Ctrl+S 保存。
