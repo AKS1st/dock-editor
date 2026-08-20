@@ -11,6 +11,7 @@
 import type {} from './contract.ts'
 import type { CloseRequest, WorkbenchContext, WorkbenchService } from './contract.ts'
 import { EditorView } from './EditorView'
+import { confirmDialog } from './confirm'
 
 /** Requires the workbench base (carrier) and the dock-files file domain. */
 export const inject = ['workbench', 'files']
@@ -93,10 +94,11 @@ export function apply(ctx: WorkbenchContext): void {
     title: 'Editor',
     order: 100,
     component: EditorView,
-    beforeClose: (request: CloseRequest) => {
+    beforeClose: (request: CloseRequest): boolean | Promise<boolean> => {
       const meta = request.seed?.meta
       if (meta !== null && typeof meta === 'object' && (meta as { dirty?: unknown }).dirty === true) {
-        return window.confirm('有未保存的修改，确定关闭？')
+        // Themed in-app confirm (replaces the native window.confirm).
+        return confirmDialog('有未保存的修改，确定关闭？')
       }
       return true
     },
