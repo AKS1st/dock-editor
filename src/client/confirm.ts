@@ -9,6 +9,7 @@ import { createRoot } from 'react-dom/client'
 
 interface ConfirmProps {
   message: string
+  labels?: { ok?: string; cancel?: string }
   onResult: (confirmed: boolean) => void
 }
 
@@ -66,7 +67,7 @@ const BTN_PRIMARY: CSSProperties = {
 }
 
 function ConfirmDialog(props: ConfirmProps): ReactNode {
-  const { message, onResult } = props
+  const { message, labels, onResult } = props
   const okRef = useRef<HTMLButtonElement | null>(null)
   useEffect(() => {
     okRef.current?.focus()
@@ -80,15 +81,16 @@ function ConfirmDialog(props: ConfirmProps): ReactNode {
     createElement('div', { style: CARD, onMouseDown: (event: MouseEvent) => event.stopPropagation() },
       createElement('div', { style: BODY }, message),
       createElement('div', { style: ACTIONS },
-        createElement('button', { style: BTN, onClick: () => onResult(false) }, '取消'),
-        createElement('button', { ref: okRef, style: BTN_PRIMARY, onClick: () => onResult(true) }, '确定'),
+        createElement('button', { style: BTN, onClick: () => onResult(false) }, labels?.cancel ?? 'Cancel'),
+        createElement('button', { ref: okRef, style: BTN_PRIMARY, onClick: () => onResult(true) }, labels?.ok ?? 'OK'),
       ),
     ),
   )
 }
 
-/** Show a themed confirm; resolves true on 确定, false on 取消 / Esc / backdrop. */
-export function confirmDialog(message: string): Promise<boolean> {
+/** Show a themed confirm; resolves true on 确定, false on 取消 / Esc / backdrop.
+ *  `labels` carries already-translated button text (defaults 'OK' / 'Cancel'). */
+export function confirmDialog(message: string, labels?: { ok?: string; cancel?: string }): Promise<boolean> {
   return new Promise((resolve) => {
     const host = document.createElement('div')
     document.body.appendChild(host)
@@ -98,6 +100,6 @@ export function confirmDialog(message: string): Promise<boolean> {
       host.remove()
       resolve(confirmed)
     }
-    root.render(createElement(ConfirmDialog, { message, onResult: finish }))
+    root.render(createElement(ConfirmDialog, { message, labels, onResult: finish }))
   })
 }

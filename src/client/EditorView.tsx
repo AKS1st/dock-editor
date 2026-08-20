@@ -6,6 +6,8 @@
  */
 import { createElement, useCallback, useEffect, useRef, useState, type ReactNode } from 'react'
 import type { ViewProps, WorkbenchService } from './contract.ts'
+import { useLocale, type T } from './hooks'
+import { translate } from './i18n'
 
 /** The seed shape the file domain dispatches (EditorOpenSeed). */
 interface OpenSeed {
@@ -77,6 +79,10 @@ export function EditorView(props: ViewProps): ReactNode {
   const openSeed = (seed ?? {}) as OpenSeed
   const path = openSeed.path
   const workbench = ctx.get<WorkbenchService>('workbench')
+
+  const locale = useLocale(ctx)
+  const t: T = useCallback((key: string, params?: Record<string, string | number>): string =>
+    translate(locale, key, params), [locale])
 
   const [content, setContent] = useState<string | null>(null)
   const [binary, setBinary] = useState(false)
@@ -260,7 +266,7 @@ export function EditorView(props: ViewProps): ReactNode {
       // The file is larger than the editor's read cap: the buffer in memory
       // is only the first 256 KiB, so writing it back would silently
       // truncate the file. Refuse up front (the host enforces this too).
-      setError('文件超过 256 KiB 编辑上限，已禁止保存，以免截断原文件。')
+      setError(t('saveTooLarge'))
       return
     }
     setSaving(true)
@@ -280,7 +286,7 @@ export function EditorView(props: ViewProps): ReactNode {
     } finally {
       setSaving(false)
     }
-  }, [path, sessionId, dirty, truncated])
+  }, [path, sessionId, dirty, truncated, t])
 
   // Global shortcuts while this view is on screen.
   useEffect(() => {
@@ -318,14 +324,14 @@ export function EditorView(props: ViewProps): ReactNode {
       // Toolbar (left): undo / redo / save.
       btn('↶', undo, !canUndo),
       btn('↷', redo, !canRedo),
-      btn(saving ? '保存中…' : (dirty ? '保存 ●' : '保存'), () => void save(), !dirty || saving || truncated, dirty ? INLINE.btnDirty : undefined),
+      btn(t(saving ? 'saving' : (dirty ? 'saveDirty' : 'save')), () => void save(), !dirty || saving || truncated, dirty ? INLINE.btnDirty : undefined),
       createElement('span', { style: INLINE.title, title: path }, title),
       savedAt !== null
-        ? createElement('span', { style: INLINE.meta }, `已保存 ${new Date(savedAt).toLocaleTimeString()}`)
+        ? createElement('span', { style: INLINE.meta }, t('savedAt', { time: new Date(savedAt).toLocaleTimeString() }))
         : null,
     ),
     truncated
-      ? createElement('div', { style: INLINE.err }, '文件超过 256 KiB，仅显示前 256 KiB；已禁用保存以免截断原文件。')
+      ? createElement('div', { style: INLINE.err }, t('truncatedNotice'))
       : null,
     error !== null
       ? createElement('div', { style: INLINE.err }, error)
