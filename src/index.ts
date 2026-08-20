@@ -4,7 +4,8 @@
  * gateway; conversation-scoped through the session cwd. Wire / fence /
  * fs helpers follow the same stripped pattern as dock-files.
  */
-import { open, stat, writeFile } from 'node:fs/promises'
+import { open, realpath, stat, writeFile } from 'node:fs/promises'
+import { basename, dirname, isAbsolute, join, relative, resolve, sep } from 'node:path'
 import type { IncomingHttpHeaders, IncomingMessage, ServerResponse } from 'node:http'
 
 export const name = 'dock-editor'
@@ -74,6 +75,32 @@ function requireAbsolute(path: string): string {
     throw new WbError('fs-error', `"${path}" is not an absolute path`, 400)
   }
   return path
+}
+
+/**
+ * Confine a caller-supplied absolute path to the session workspace: the
+ * canonical (symlink-resolved) path must equal the canonical session cwd or
+ * live under it (separator boundary). Any escape — `..`, a symlink pointing
+ * out of the workspace, or an unrelated absolute path — is rejected 403.
+ * For a not-yet-existing write target, the parent directory is canonicalized
+ * and the basename re-appended before the containment check. Returns the
+ * canonical target path.
+ */
+async function resolveWorkspacePath(cwd: string, raw: string): Promise<string> {
+  const root = await realpath(cwd).catch(() => resolve(cwd))
+  requireAbsolute(raw)
+  let target: string
+  try {
+    target = await realpath(raw)
+  } catch {
+    const parent = await realpath(dirname(raw)).catch(() => dirname(raw))
+    target = join(parent, basename(raw))
+  }
+  const rel = relative(root, target)
+  if (rel === '' || (rel !== '..' && !rel.startsWith(`..${sep}`) && !isAbsolute(rel))) {
+    return target
+  }
+  throw new WbError('forbidden', `path is outside the session workspace: "${raw}"`, 403)
 }
 
 function messageOf(error: unknown): string {
@@ -222,7 +249,8 @@ export function apply(ctx: WbContext): void {
             return
           }
           const cwd = sessionCwdOf(ctx, sessionId)
-          const file = await readFileText(requireAbsolute(raw), READ_LIMIT_BYTES)
+          const path = await resolveWorkspacePath(cwd, raw)
+          const file = await readFileText(path, READ_LIMIT_BYTES)
           writeOk(res, { file, cwd })
           return
         }
@@ -234,7 +262,18 @@ export function apply(ctx: WbContext): void {
             return
           }
           const cwd = sessionCwdOf(ctx, stringOrUndefined(payload, 'sessionId'))
-          await writeFile(requireAbsolute(raw), text, 'utf8').catch((error) => {
+          const path = await resolveWorkspacePath(cwd, raw)
+          // Truncation guard: a file larger than the read cap can never be
+          // fully read by this editor, so writing the partial buffer back
+          // would silently destroy the rest of the file (C2). Reject the
+          // write before touching the target.
+          const info = await stat(path).catch(() => undefined)
+          if (info !== undefined && info.size > READ_LIMIT_BYTES) {
+            writeError(res, new WbError('fs-error',
+              `"${raw}" is ${info.size} bytes, over the ${READ_LIMIT_BYTES}-byte editor limit`, 413))
+            return
+          }
+          await writeFile(path, text, 'utf8').catch((error) => {
             throw new WbError('fs-error', `cannot write "${raw}": ${messageOf(error)}`, 400)
           })
           writeOk(res, { saved: true, cwd })
