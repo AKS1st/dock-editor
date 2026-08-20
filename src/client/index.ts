@@ -1,15 +1,15 @@
 /**
  * Client half of dock-editor: registers the 'editor' file viewer against the
  * dock-files file domain (as the default viewer) and the matching editor-area
- * view against dock. The view renders a file's text content (read-only in
- * Phase 1) fetched through its own /desk-editor/fs.read host route.
+ * view against dock. The view renders a file's text content fetched through
+ * its own /desk-editor/fs.read host route.
  *
  * inject declares BOTH 'workbench' and 'files': Cordis activates this plugin
  * only after dock (carrier) and dock-files (file domain) have provided their
  * services, so the viewer registration is never skipped by activation order.
  */
-import type {} from 'dock/client/contract'
-import type { CloseRequest, WorkbenchContext, WorkbenchService } from 'dock/client/contract'
+import type {} from './contract.ts'
+import type { CloseRequest, WorkbenchContext, WorkbenchService } from './contract.ts'
 import { EditorView } from './EditorView'
 
 /** Requires the workbench base (carrier) and the dock-files file domain. */
