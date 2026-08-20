@@ -5,7 +5,7 @@
  * - toolbar (undo / redo / save) sits at the left of the title bar
  */
 import { createElement, useCallback, useEffect, useRef, useState, type ReactNode } from 'react'
-import type { ViewProps, WorkbenchService } from 'dock/client/contract'
+import type { ViewProps, WorkbenchService } from './contract.ts'
 
 /** The seed shape the file domain dispatches (EditorOpenSeed). */
 interface OpenSeed {
@@ -80,6 +80,7 @@ export function EditorView(props: ViewProps): ReactNode {
 
   const [content, setContent] = useState<string | null>(null)
   const [binary, setBinary] = useState(false)
+  const [truncated, setTruncated] = useState(false)
   const [size, setSize] = useState(0)
   const [error, setError] = useState<string | null>(null)
   const [dirty, setDirty] = useState(false)
@@ -126,6 +127,7 @@ export function EditorView(props: ViewProps): ReactNode {
     setContent(null)
     setError(null)
     setDirty(false)
+    setTruncated(false)
     setSavedAt(null)
     undoRef.current = []
     redoRef.current = []
@@ -146,6 +148,7 @@ export function EditorView(props: ViewProps): ReactNode {
         contentRef.current = file.content
         setContent(file.content)
         setBinary(file.binary)
+        setTruncated(file.truncated)
         setSize(file.size)
       } catch (cause) {
         if (cancelled) return
@@ -170,7 +173,7 @@ export function EditorView(props: ViewProps): ReactNode {
     const instanceId = ownInstance()
     if (instanceId === undefined) return
     workbench.moveFloatingWindow(instanceId, saved.x, saved.y)
-    workbench.resizeFloatingWindow(instanceId, saved.width, saved.height)
+    workbench.resizeFloatingWindow(instanceId, saved.x, saved.y, saved.width, saved.height)
   }, [path, workbench, ownInstance])
 
   /**
@@ -253,6 +256,13 @@ export function EditorView(props: ViewProps): ReactNode {
 
   const save = useCallback(async (): Promise<void> => {
     if (path === undefined || contentRef.current === null || !dirty) return
+    if (truncated) {
+      // The file is larger than the editor's read cap: the buffer in memory
+      // is only the first 256 KiB, so writing it back would silently
+      // truncate the file. Refuse up front (the host enforces this too).
+      setError('文件超过 256 KiB 编辑上限，已禁止保存，以免截断原文件。')
+      return
+    }
     setSaving(true)
     try {
       const response = await fetch('/desk-editor/fs.write', {
@@ -270,7 +280,7 @@ export function EditorView(props: ViewProps): ReactNode {
     } finally {
       setSaving(false)
     }
-  }, [path, sessionId, dirty])
+  }, [path, sessionId, dirty, truncated])
 
   // Global shortcuts while this view is on screen.
   useEffect(() => {
@@ -308,12 +318,15 @@ export function EditorView(props: ViewProps): ReactNode {
       // Toolbar (left): undo / redo / save.
       btn('↶', undo, !canUndo),
       btn('↷', redo, !canRedo),
-      btn(saving ? '保存中…' : (dirty ? '保存 ●' : '保存'), () => void save(), !dirty || saving, dirty ? INLINE.btnDirty : undefined),
+      btn(saving ? '保存中…' : (dirty ? '保存 ●' : '保存'), () => void save(), !dirty || saving || truncated, dirty ? INLINE.btnDirty : undefined),
       createElement('span', { style: INLINE.title, title: path }, title),
       savedAt !== null
         ? createElement('span', { style: INLINE.meta }, `已保存 ${new Date(savedAt).toLocaleTimeString()}`)
         : null,
     ),
+    truncated
+      ? createElement('div', { style: INLINE.err }, '文件超过 256 KiB，仅显示前 256 KiB；已禁用保存以免截断原文件。')
+      : null,
     error !== null
       ? createElement('div', { style: INLINE.err }, error)
       : content === null
