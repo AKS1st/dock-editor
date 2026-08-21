@@ -42,7 +42,7 @@ dsh plugin add github:AKS1st/dock-editor
 
 ## Security
 
-The `/desk-editor` route only accepts POSTs from trusted origins (loopback / trustedHosts plus same-origin check). All read/write paths are canonicalized with realpath and confined to the session workspace (403 otherwise); writes also verify the target size does not exceed the read cap.
+The `/desk-editor` route only accepts POSTs from trusted origins (loopback / trustedHosts plus same-origin check). Read paths only need to be absolute — they are not confined to the session workspace, because the conversation context can mention files outside it (e.g. `~/.dsh/skills/...`) and the viewers open them for viewing; writes remain confined to the session workspace (403 otherwise), and outside-workspace files open read-only in the editor; writes also verify the target size does not exceed the read cap.
 
 ## License
 

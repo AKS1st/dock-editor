@@ -42,7 +42,7 @@ dsh plugin add github:AKS1st/dock-editor
 
 ## 安全
 
-`/desk-editor` 路由只接受受信任来源（回环地址 / trustedHosts + 同源检查）的 POST。所有读写路径先 realpath 规范化并限定在会话工作区内（越界 403）；写入前还会校验目标大小不超读取上限。
+`/desk-editor` 路由只接受受信任来源（回环地址 / trustedHosts + 同源检查）的 POST。读取路径只要求是绝对路径、不限定会话工作区——对话上下文可能提及工作区外的文件（如 `~/.dsh/skills/...`），查看器可打开它们查看；写入仍限定在会话工作区内（越界 403），工作区外文件在编辑器中以只读打开；写入前还会校验目标大小不超读取上限。
 
 ## License
 

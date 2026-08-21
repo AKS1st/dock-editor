@@ -3,6 +3,12 @@
  * size cap, binary NUL detection). Browser-trust fenced like the /api
  * gateway; conversation-scoped through the session cwd. Wire / fence /
  * fs helpers follow the same stripped pattern as dock-files.
+ *
+ * Reads accept any absolute path — the conversation context can mention
+ * files outside the session workspace (e.g. ~/.dsh/skills/...), and the
+ * workbench viewers open them for viewing. Writes stay workspace-confined
+ * (fs.write 403s outside paths); a read response carries `writable:false`
+ * for outside-workspace files so the editor opens them read-only.
  */
 import { open, realpath, stat, writeFile } from 'node:fs/promises'
 import { basename, dirname, isAbsolute, join, relative, resolve, sep } from 'node:path'
@@ -105,6 +111,37 @@ async function resolveWorkspacePath(cwd: string, raw: string): Promise<string> {
 
 function messageOf(error: unknown): string {
   return error instanceof Error ? error.message : String(error)
+}
+
+/**
+ * Resolve a caller-supplied absolute path for READING: no workspace
+ * containment — viewers open files anywhere on the host, because the
+ * conversation context can mention paths outside the session workspace.
+ * Writes stay confined (fs.write uses resolveWorkspacePath).
+ */
+function resolveReadPath(raw: string): string {
+  requireAbsolute(raw)
+  return resolve(raw)
+}
+
+/**
+ * Whether a caller-supplied absolute path lies inside the session workspace
+ * (canonical containment, same rule as resolveWorkspacePath). The read route
+ * reports this as `writable` so the client opens outside-workspace files
+ * read-only; fs.write independently rejects such paths (defense in depth).
+ */
+async function isInsideWorkspace(cwd: string, raw: string): Promise<boolean> {
+  const root = await realpath(cwd).catch(() => resolve(cwd))
+  requireAbsolute(raw)
+  let target: string
+  try {
+    target = await realpath(raw)
+  } catch {
+    const parent = await realpath(dirname(raw)).catch(() => dirname(raw))
+    target = join(parent, basename(raw))
+  }
+  const rel = relative(root, target)
+  return rel === '' || (rel !== '..' && !rel.startsWith(`..${sep}`) && !isAbsolute(rel))
 }
 
 /** Cap for a single text-file read (256 KiB keeps the editor snappy). */
@@ -249,9 +286,12 @@ export function apply(ctx: WbContext): void {
             return
           }
           const cwd = sessionCwdOf(ctx, sessionId)
-          const path = await resolveWorkspacePath(cwd, raw)
+          const path = resolveReadPath(raw)
           const file = await readFileText(path, READ_LIMIT_BYTES)
-          writeOk(res, { file, cwd })
+          // Outside-workspace files open read-only: saving stays confined to
+          // the session workspace (fs.write), so tell the client up front.
+          const writable = await isInsideWorkspace(cwd, path)
+          writeOk(res, { file, cwd, writable })
           return
         }
         if (method === 'fs.write') {

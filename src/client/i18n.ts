@@ -32,6 +32,7 @@ export const DICTS: Record<LocaleId, Dict> = {
     saveDirty: '保存 ●',
     saving: '保存中…',
     savedAt: '已保存 {time}',
+    readOnly: '只读（工作区外）',
 
     // ── Size-limit guards (user-facing errors) ───────────────────────────
     saveTooLarge: '文件超过 256 KiB 编辑上限，已禁止保存，以免截断原文件。',
@@ -48,6 +49,7 @@ export const DICTS: Record<LocaleId, Dict> = {
     saveDirty: 'Save ●',
     saving: 'Saving…',
     savedAt: 'Saved {time}',
+    readOnly: 'Read-only (outside workspace)',
 
     // ── Size-limit guards (user-facing errors) ───────────────────────────
     saveTooLarge: 'File exceeds the 256 KiB editing limit; saving is disabled to avoid truncating the original file.',

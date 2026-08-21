@@ -54,7 +54,7 @@ function writeGeometry(path: string, geometry: WindowGeometry): void {
 
 interface ReadResponse {
   ok: boolean
-  value?: { file: { content: string; truncated: boolean; binary: boolean; size: number } }
+  value?: { file: { content: string; truncated: boolean; binary: boolean; size: number }; writable?: boolean }
   error?: { code: string; message: string }
 }
 
@@ -88,6 +88,9 @@ export function EditorView(props: ViewProps): ReactNode {
   const [binary, setBinary] = useState(false)
   const [truncated, setTruncated] = useState(false)
   const [size, setSize] = useState(0)
+  /** False when the file lives outside the session workspace (saving stays
+   *  workspace-confined, so the editor opens such files read-only). */
+  const [writable, setWritable] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [dirty, setDirty] = useState(false)
   const [saving, setSaving] = useState(false)
@@ -134,6 +137,7 @@ export function EditorView(props: ViewProps): ReactNode {
     setError(null)
     setDirty(false)
     setTruncated(false)
+    setWritable(true)
     setSavedAt(null)
     undoRef.current = []
     redoRef.current = []
@@ -156,6 +160,7 @@ export function EditorView(props: ViewProps): ReactNode {
         setBinary(file.binary)
         setTruncated(file.truncated)
         setSize(file.size)
+        setWritable(json.value.writable !== false)
       } catch (cause) {
         if (cancelled) return
         setError(cause instanceof Error ? cause.message : String(cause))
@@ -262,6 +267,11 @@ export function EditorView(props: ViewProps): ReactNode {
 
   const save = useCallback(async (): Promise<void> => {
     if (path === undefined || contentRef.current === null || !dirty) return
+    if (!writable) {
+      // Outside-workspace files open read-only (host fs.write rejects them).
+      setError(t('readOnly'))
+      return
+    }
     if (truncated) {
       // The file is larger than the editor's read cap: the buffer in memory
       // is only the first 256 KiB, so writing it back would silently
@@ -286,7 +296,7 @@ export function EditorView(props: ViewProps): ReactNode {
     } finally {
       setSaving(false)
     }
-  }, [path, sessionId, dirty, truncated, t])
+  }, [path, sessionId, dirty, truncated, writable, t])
 
   // Global shortcuts while this view is on screen.
   useEffect(() => {
@@ -324,8 +334,11 @@ export function EditorView(props: ViewProps): ReactNode {
       // Toolbar (left): undo / redo / save.
       btn('↶', undo, !canUndo),
       btn('↷', redo, !canRedo),
-      btn(t(saving ? 'saving' : (dirty ? 'saveDirty' : 'save')), () => void save(), !dirty || saving || truncated, dirty ? INLINE.btnDirty : undefined),
+      btn(t(saving ? 'saving' : (dirty ? 'saveDirty' : 'save')), () => void save(), !dirty || saving || truncated || !writable, dirty ? INLINE.btnDirty : undefined),
       createElement('span', { style: INLINE.title, title: path }, title),
+      !writable
+        ? createElement('span', { style: INLINE.meta }, t('readOnly'))
+        : null,
       savedAt !== null
         ? createElement('span', { style: INLINE.meta }, t('savedAt', { time: new Date(savedAt).toLocaleTimeString() }))
         : null,
@@ -342,6 +355,7 @@ export function EditorView(props: ViewProps): ReactNode {
           : createElement('textarea', {
             style: INLINE.area,
             spellCheck: false,
+            readOnly: !writable,
             value: content,
             onChange: (event: { target: { value: string } }) => edit(event.target.value),
           }),
