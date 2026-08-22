@@ -30,3 +30,10 @@ export declare function translate(locale: LocaleId, key: string, params?: Record
  * English as the last resort. `ctx` may be absent (standalone runs).
  */
 export declare function detectLocale(ctx: unknown): LocaleId;
+/**
+ * CodeMirror 6 search-panel phrase translations (supplied through
+ * `EditorState.phrases`). CodeMirror's built-in panel buttons/placeholders are
+ * English by default; providing the map localizes them. For 'en' we return an
+ * empty map so CM keeps its own defaults.
+ */
+export declare function cmPhrases(locale: LocaleId): Record<string, string>;

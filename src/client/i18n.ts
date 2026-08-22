@@ -37,6 +37,16 @@ export const DICTS: Record<LocaleId, Dict> = {
     // ── Size-limit guards (user-facing errors) ───────────────────────────
     saveTooLarge: '文件超过 256 KiB 编辑上限，已禁止保存，以免截断原文件。',
     truncatedNotice: '文件超过 256 KiB，仅显示前 256 KiB；已禁用保存以免截断原文件。',
+
+    // ── In-editor search widget (VSCode-style top-right) ─────────────────
+    searchFind: '查找',
+    searchReplace: '替换',
+    searchPrev: '上一个匹配',
+    searchNext: '下一个匹配',
+    searchReplaceOne: '替换',
+    searchReplaceAll: '全部替换',
+    searchClose: '关闭',
+    searchNoMatch: '无匹配',
   },
   en: {
     // ── Confirm dialog (beforeClose unsaved-changes gate) ────────────────
@@ -54,6 +64,16 @@ export const DICTS: Record<LocaleId, Dict> = {
     // ── Size-limit guards (user-facing errors) ───────────────────────────
     saveTooLarge: 'File exceeds the 256 KiB editing limit; saving is disabled to avoid truncating the original file.',
     truncatedNotice: 'File exceeds 256 KiB; only the first 256 KiB is shown, and saving is disabled to avoid truncating the original file.',
+
+    // ── In-editor search widget (VSCode-style top-right) ─────────────────
+    searchFind: 'Find',
+    searchReplace: 'Replace',
+    searchPrev: 'Previous match',
+    searchNext: 'Next match',
+    searchReplaceOne: 'Replace',
+    searchReplaceAll: 'Replace All',
+    searchClose: 'Close',
+    searchNoMatch: 'No matches',
   },
 }
 
@@ -84,4 +104,27 @@ export function detectLocale(ctx: unknown): LocaleId {
     return 'zh'
   }
   return 'en'
+}
+
+/**
+ * CodeMirror 6 search-panel phrase translations (supplied through
+ * `EditorState.phrases`). CodeMirror's built-in panel buttons/placeholders are
+ * English by default; providing the map localizes them. For 'en' we return an
+ * empty map so CM keeps its own defaults.
+ */
+export function cmPhrases(locale: LocaleId): Record<string, string> {
+  if (locale !== 'zh') return {}
+  return {
+    'Find': '查找',
+    'Replace': '替换',
+    'next': '下一个',
+    'previous': '上一个',
+    'all': '全部',
+    'replace': '替换',
+    'replace all': '全部替换',
+    'close': '关闭',
+    'match case': '区分大小写',
+    'regexp': '正则',
+    'by word': '全词',
+  }
 }

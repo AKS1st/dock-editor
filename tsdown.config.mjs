@@ -3,6 +3,12 @@
  * host half ESM; client half a single CJS closure factory. react / cordis
  * stay external; dock is imported type-only (erased), all runtime
  * interaction goes through ctx.workbench / ctx.files method calls.
+ *
+ * @codemirror/* + @lezer/* are deliberately NOT external: they are declared
+ * as devDependencies so tsdown bundles them into lib/client.js (the client
+ * module table only resolves the platform seed words react / cordis /
+ * @deepseek-ai/dsh-client-*), same rule as dock-markdown bundling marked. The
+ * published bundle ships the editor self-contained.
  */
 const id = 'dock-editor'
 

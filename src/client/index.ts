@@ -13,6 +13,7 @@ import type { CloseRequest, WorkbenchContext, WorkbenchService } from './contrac
 import { EditorView } from './EditorView'
 import { confirmDialog } from './confirm'
 import { detectLocale, translate } from './i18n'
+import { CODE_FAMILIES } from './code'
 
 /** Requires the workbench base (carrier) and the dock-files file domain. */
 export const inject = ['workbench', 'files']
@@ -40,22 +41,6 @@ const CODE_ICON = {
   viewBox: '0 0 16 16',
   path: 'M4.42 8.40L6.72 5.40L5.68 4.60L3.38 7.60ZM3.38 8.40L5.68 11.40L6.72 10.60L4.42 7.60ZM6.58 5.41L8.48 11.01L9.72 10.59L7.82 4.99ZM12.99 7.57L10.39 4.57L9.41 5.43L12.01 8.43ZM12.01 7.57L9.41 10.57L10.39 11.43L12.99 8.43Z',
 }
-
-/**
- * Text/source families the editor opens, each with its explorer icon: the
- * `</>` code glyph tinted per family (colors mirror the dock-files built-in
- * palette, so the ownership moves here without changing the look).
- */
-const CODE_FAMILIES: { exts: string[]; color: string }[] = [
-  { exts: ['ts', 'tsx', 'mts', 'cts'], color: '#519aba' },
-  { exts: ['js', 'jsx', 'mjs', 'cjs'], color: '#d9a741' },
-  { exts: ['json', 'jsonc'], color: '#c9c64d' },
-  { exts: ['yml', 'yaml', 'toml', 'ini', 'conf', 'cfg'], color: '#d4633a' },
-  { exts: ['css', 'scss', 'sass', 'less'], color: '#42a5f5' },
-  { exts: ['html', 'htm', 'xhtml', 'xml'], color: '#e44d26' },
-  { exts: ['py', 'pyw'], color: '#3572a5' },
-  { exts: ['sh', 'bash', 'zsh', 'fish'], color: '#6ab04c' },
-]
 
 /** Client plugin body. */
 export function apply(ctx: WorkbenchContext): void {

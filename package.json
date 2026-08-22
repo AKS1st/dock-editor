@@ -1,6 +1,6 @@
 {
   "name": "dock-editor",
-  "version": "0.1.1",
+  "version": "0.2.0",
   "description": "Text file viewer and editor for the dock file explorer: undo/redo, Ctrl+S save, and unsaved-change confirmation.",
   "type": "module",
   "repository": {
@@ -65,6 +65,19 @@
     }
   },
   "devDependencies": {
+    "@codemirror/commands": "^6.0.0",
+    "@codemirror/lang-css": "^6.0.0",
+    "@codemirror/lang-html": "^6.0.0",
+    "@codemirror/lang-javascript": "^6.0.0",
+    "@codemirror/lang-json": "^6.0.0",
+    "@codemirror/lang-python": "^6.0.0",
+    "@codemirror/lang-yaml": "^6.0.0",
+    "@codemirror/language": "^6.0.0",
+    "@codemirror/legacy-modes": "^6.0.0",
+    "@codemirror/search": "^6.0.0",
+    "@codemirror/state": "^6.0.0",
+    "@codemirror/view": "^6.0.0",
+    "@lezer/highlight": "^1.0.0",
     "@types/node": "^22.0.0",
     "@types/react": "^18.2.0",
     "@types/react-dom": "^18.2.0",
