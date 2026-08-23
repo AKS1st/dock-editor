@@ -41,18 +41,20 @@ dock 系列的文件编辑器插件：注册 `editor` 文件查看器（默认�
 
 需要 `dock` 与 `dock-files`：
 
-```sh
-dsh plugin add github:AKS1st/dock
-dsh plugin add github:AKS1st/dock-files
-dsh plugin add github:AKS1st/dock-editor
-```
-
-从 npm registry 安装同样支持：
+推荐从 npm registry 安装：
 
 ```sh
 dsh plugin add dock-base
 dsh plugin add dock-files
 dsh plugin add dock-editor
+```
+
+或通过 GitHub 安装（备选）：
+
+```sh
+dsh plugin add github:AKS1st/dock
+dsh plugin add github:AKS1st/dock-files
+dsh plugin add github:AKS1st/dock-editor
 ```
 
 ## 安全
