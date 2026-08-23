@@ -66,6 +66,7 @@ const INLINE = {
   btn: { border: '1px solid var(--dsw-alias-border-l2, #d8dbe0)', background: 'transparent', color: 'var(--dsw-alias-label-primary, #1f2328)', borderRadius: 5, padding: '2px 8px', cursor: 'pointer', fontSize: 12, opacity: 1 } as const,
   btnDisabled: { opacity: 0.4, cursor: 'default' } as const,
   btnDirty: { background: 'var(--dsw-alias-interactive-bg-hover-accent, rgba(90,120,255,0.18))' } as const,
+  btnActive: { background: 'var(--dsw-alias-interactive-bg-hover-accent, rgba(90,120,255,0.18))' } as const,
   title: { fontWeight: 600, color: 'var(--dsw-alias-label-primary, #1f2328)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' as const, marginLeft: 8, flex: 1 },
   meta: { fontSize: 11 },
   area: { flex: 1, minHeight: 0, width: '100%', resize: 'none' as const, border: 0, outline: 'none', background: 'transparent', color: 'var(--dsw-alias-label-primary, #1f2328)', fontSize: 13, lineHeight: 1.6, fontFamily: 'ui-monospace, SFMono-Regular, Menlo, Consolas, monospace', whiteSpace: 'pre' as const, overflow: 'auto' },
@@ -96,6 +97,8 @@ export function EditorView(props: ViewProps): ReactNode {
   const [savedAt, setSavedAt] = useState<number | null>(null)
   const [canUndo, setCanUndo] = useState(false)
   const [canRedo, setCanRedo] = useState(false)
+  /** Line wrapping for the CodeMirror editor; on by default. */
+  const [wrap, setWrap] = useState(true)
   /** CodeMirror imperative surface: undo/redo/focus for every text file. */
   const codeRef = useRef<CodeMirrorControl | null>(null)
   const contentRef = useRef<string | null>(null)
@@ -298,18 +301,20 @@ export function EditorView(props: ViewProps): ReactNode {
   }, [active, path, save])
 
   const title = openSeed.title ?? path?.split('/').pop() ?? 'No file'
-  const btn = (label: string, action: () => void, disabled: boolean, extra?: object): ReactNode =>
+  const btn = (label: string, action: () => void, disabled: boolean, extra?: object, btnTitle?: string): ReactNode =>
     createElement('button', {
       style: { ...INLINE.btn, ...(disabled ? INLINE.btnDisabled : {}), ...(extra ?? {}) },
       disabled,
       onClick: action,
+      title: btnTitle,
     }, label)
 
   return createElement('div', { style: INLINE.wrap },
     createElement('div', { style: INLINE.head },
-      // Toolbar (left): undo / redo / save.
+      // Toolbar (left): undo / redo / wrap / save.
       btn('↶', invokeUndo, !canUndo),
       btn('↷', invokeRedo, !canRedo),
+      btn(t('wrap'), () => setWrap(v => !v), false, wrap ? INLINE.btnActive : undefined, wrap ? t('wrapTooltipOn') : t('wrapTooltipOff')),
       btn(t(saving ? 'saving' : (dirty ? 'saveDirty' : 'save')), () => void save(), !dirty || saving || truncated || !writable, dirty ? INLINE.btnDirty : undefined),
       createElement('span', { style: INLINE.title, title: path }, title),
       !writable
@@ -337,6 +342,7 @@ export function EditorView(props: ViewProps): ReactNode {
             initialContent: content,
             readOnly: !writable,
             language,
+            wrap,
             t,
             onDocChanged: handleDocChanged,
             onHistoryChanged: handleHistoryChanged,

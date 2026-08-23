@@ -65,6 +65,8 @@ interface Props {
   readOnly: boolean
   /** Language extension for the file, or null to edit as plain text. */
   language: Extension | null
+  /** Line wrapping enabled (default on). Toggled from the toolbar. */
+  wrap: boolean
   t: T
   onDocChanged: (content: string) => void
   onHistoryChanged: (history_: { canUndo: boolean; canRedo: boolean }) => void
@@ -166,10 +168,11 @@ const searchMatches = ViewPlugin.fromClass(class {
 })
 
 export function CodeMirrorEditor(props: Props): ReactNode {
-  const { initialContent, readOnly, language, t, onDocChanged, onHistoryChanged, controlRef } = props
+  const { initialContent, readOnly, language, wrap, t, onDocChanged, onHistoryChanged, controlRef } = props
   const containerRef = useRef<HTMLDivElement | null>(null)
   const viewRef = useRef<EditorView | null>(null)
   const readOnlyCompartment = useRef(new Compartment())
+  const wrapCompartment = useRef(new Compartment())
 
   const [searchOpen, setSearchOpen] = useState(false)
   const [searchMode, setSearchMode] = useState<'find' | 'replace'>('find')
@@ -218,6 +221,7 @@ export function CodeMirrorEditor(props: Props): ReactNode {
       search(),
       searchMatches,
       readOnlyCompartment.current.of(EditorState.readOnly.of(readOnly)),
+      wrapCompartment.current.of(wrap ? EditorView.lineWrapping : []),
       keymap.of([
         { key: 'Mod-f', run: () => { try { openSearchRef.current('find'); return true } catch { return false } } },
         { key: 'Mod-h', run: () => { try { openSearchRef.current('replace'); return true } catch { return false } } },
@@ -261,6 +265,14 @@ export function CodeMirrorEditor(props: Props): ReactNode {
     if (view === null) return
     try { view.dispatch({ effects: readOnlyCompartment.current.reconfigure(EditorState.readOnly.of(readOnly)) }) } catch { /* ignore */ }
   }, [readOnly])
+
+  // Line wrapping: default on, toggled from the toolbar. The compartment lets
+  // the editor switch between wrap and horizontal-scroll without a remount.
+  useEffect(() => {
+    const view = viewRef.current
+    if (view === null) return
+    try { view.dispatch({ effects: wrapCompartment.current.reconfigure(wrap ? EditorView.lineWrapping : []) }) } catch { /* ignore */ }
+  }, [wrap])
 
   // While the search widget is open the editor's own text caret is distracting
   // (it blinks in the content, left of the floating widget). Blur the editor

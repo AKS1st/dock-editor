@@ -38,6 +38,12 @@ export const editorTheme = EditorView.theme({
   '.cm-line': {
     whiteSpace: 'pre',
   },
+  // CodeMirror adds `.cm-lineWrapping` (via EditorView.lineWrapping) to the
+  // content when line wrapping is on; without this the explicit `whiteSpace:
+  // pre` above would override the inherited wrap and force horizontal scroll.
+  '.cm-content.cm-lineWrapping .cm-line': {
+    whiteSpace: 'break-spaces',
+  },
   '.cm-cursor, .cm-dropCursor': {
     borderLeftColor: 'var(--dsw-alias-label-primary, #1f2328)',
     borderLeftWidth: '2px',

@@ -32,6 +32,8 @@ interface Props {
     readOnly: boolean;
     /** Language extension for the file, or null to edit as plain text. */
     language: Extension | null;
+    /** Line wrapping enabled (default on). Toggled from the toolbar. */
+    wrap: boolean;
     t: T;
     onDocChanged: (content: string) => void;
     onHistoryChanged: (history_: {

@@ -33,6 +33,9 @@ export const DICTS: Record<LocaleId, Dict> = {
     saving: '保存中…',
     savedAt: '已保存 {time}',
     readOnly: '只读（工作区外）',
+    wrap: '换行',
+    wrapTooltipOn: '自动换行：开，点击关闭',
+    wrapTooltipOff: '自动换行：关，点击开启',
 
     // ── Size-limit guards (user-facing errors) ───────────────────────────
     saveTooLarge: '文件超过 256 KiB 编辑上限，已禁止保存，以免截断原文件。',
@@ -60,6 +63,9 @@ export const DICTS: Record<LocaleId, Dict> = {
     saving: 'Saving…',
     savedAt: 'Saved {time}',
     readOnly: 'Read-only (outside workspace)',
+    wrap: 'Wrap',
+    wrapTooltipOn: 'Line wrap: on. Click to turn off',
+    wrapTooltipOff: 'Line wrap: off. Click to turn on',
 
     // ── Size-limit guards (user-facing errors) ───────────────────────────
     saveTooLarge: 'File exceeds the 256 KiB editing limit; saving is disabled to avoid truncating the original file.',
