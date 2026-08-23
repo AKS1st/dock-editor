@@ -16,6 +16,7 @@ dock 系列的文件编辑器插件：注册 `editor` 文件查看器（默认�
 - **普通文本同样可编辑**：所有文本文件都走 CodeMirror 编辑器（代码类有高亮，普通文本无高亮但在同一个编辑器里），撤销/重做、搜索、括号匹配等编辑能力全量可用。
 - **VSCode 风格右上角搜索（与 CM 面板解耦）**：`Ctrl+F` 打开编辑器内搜索浮窗（**右上角**）、`Ctrl+H` 带替换、`F3`/`Ctrl+G`（`Shift` 反向）跳转、`Esc` 关闭。搜索框是**独立浮层**（非 CM `showPanel`），不占编辑器布局——**没有**拖选自动滚动、匹配位置错乱、替换后面板折叠这些毛病。支持实时匹配高亮与 `current/total` 计数、`↑/↓` 上/下一个、`Enter` 下一个（`Shift+Enter` 上一个）；**替换默认折叠**（`⇄` 展开），主题随 DSH 变量走（深浅正常），在其上滚轮**滚动编辑区**而非整个网页。
 - **文本查看与编辑**：`Ctrl+S` 保存（视图内全局可用）；`Ctrl+Z` 撤销 / `Ctrl+Y`(或 `Ctrl+Shift+Z`) 重做、`Ctrl+C/V/X/A` 复制粘贴全选，均走编辑器原生键位；另支持 `Alt+↑/↓` 移动行、`Ctrl+/` 注释。
+- **自动换行**：工具条提供「换行」切换按钮，**默认开启**；关掉后长行回到水平滚动。
 - **未保存提示**：关闭带未保存修改的窗口前弹出确认（通过工作台 `beforeClose` 钩子与 seed dirty 标记）。
 - **二进制检测**：读取时探测 NUL 字节，二进制文件显示提示而非乱码。
 - **大小上限**：单文件读取上限 256 KiB；超过上限的文件只显示前 256 KiB、**禁用保存**，避免截断原文件（主机端同样校验并拒绝）。
@@ -44,6 +45,14 @@ dock 系列的文件编辑器插件：注册 `editor` 文件查看器（默认�
 dsh plugin add github:AKS1st/dock
 dsh plugin add github:AKS1st/dock-files
 dsh plugin add github:AKS1st/dock-editor
+```
+
+从 npm registry 安装同样支持：
+
+```sh
+dsh plugin add dock-base
+dsh plugin add dock-files
+dsh plugin add dock-editor
 ```
 
 ## 安全

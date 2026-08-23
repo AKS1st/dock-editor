@@ -46,6 +46,14 @@ dsh plugin add github:AKS1st/dock-files
 dsh plugin add github:AKS1st/dock-editor
 ```
 
+The same plugins are also available from the npm registry:
+
+```sh
+dsh plugin add dock-base
+dsh plugin add dock-files
+dsh plugin add dock-editor
+```
+
 ## Security
 
 The `/desk-editor` route only accepts POSTs from trusted origins (loopback / trustedHosts plus same-origin check). Read paths only need to be absolute — they are not confined to the session workspace, because the conversation context can mention files outside it (e.g. `~/.dsh/skills/...`) and the viewers open them for viewing; writes remain confined to the session workspace (403 otherwise), and outside-workspace files open read-only in the editor; writes also verify the target size does not exceed the read cap.
