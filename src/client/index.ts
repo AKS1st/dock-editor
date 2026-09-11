@@ -50,6 +50,13 @@ export function apply(ctx: WorkbenchContext): void {
   // anyway so a broken runtime degrades instead of throwing.
   if (workbench === undefined || files === undefined) return
 
+  ctx.effect(() => workbench.registerPlugin({
+    id: 'dock-editor',
+    title: 'Editor',
+    description: 'Text file viewer and editor for the dock file explorer: undo/redo, Ctrl+S save, and unsaved-change confirmation.',
+    hasEntry: false,
+  }), 'dock-editor: plugin metadata')
+
   // Register as the file domain's default viewer (id matches the editor view),
   // carrying the explorer's fallback icon for types with no registered icon
   // and no built-in palette entry (neutral gray, same as the explorer's
