@@ -1,6 +1,6 @@
 {
   "name": "dock-editor",
-  "version": "0.2.2",
+  "version": "0.2.3",
   "description": "Text file viewer and editor for the dock file explorer: undo/redo, Ctrl+S save, and unsaved-change confirmation.",
   "type": "module",
   "repository": {
